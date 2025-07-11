@@ -33,25 +33,18 @@ type ServerConfig struct {
 	Port string
 }
 
-func LoadConfig() *Config {
-	// Загружаем .env файл
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
+func LoadConfig() (*Config, error) {
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: .env file not found: %v", err)
 	}
 
-	dbPort, err := strconv.Atoi(getEnv("DB_PORT", "5432"))
-	if err != nil {
-		log.Fatal("Invalid DB_PORT value")
-	}
-
-	return &Config{
+	cfg := &Config{
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
-			User:     getEnv("DB_USER", ""),
+			Port:     getEnvAsInt("DB_PORT", 5432),
+			User:     getEnv("DB_USER", "postgres"),
 			Password: getEnv("DB_PASSWORD", ""),
-			Name:     getEnv("DB_NAME", ""),
-			Port:     dbPort,
+			Name:     getEnv("DB_NAME", "microblog"),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWTConfig{
@@ -62,6 +55,7 @@ func LoadConfig() *Config {
 			Port: getEnv("PORT", "8080"),
 		},
 	}
+	return cfg, nil
 }
 
 func getEnv(key, fallback string) string {
@@ -71,13 +65,16 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+func getEnvAsInt(key string, fallback int) int {
+	if value, exists := os.LookupEnv(key); exists {
+		if intValue, err := strconv.Atoi(value); err == nil {
+			return intValue
+		}
+	}
+	return fallback
+}
+
 func (c *Config) GetDatabaseDSN() string {
-	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
-		c.Database.Host,
-		c.Database.User,
-		c.Database.Password,
-		c.Database.Name,
-		c.Database.Port,
-		c.Database.SSLMode,
-	)
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		c.Database.Host, c.Database.Port, c.Database.User, c.Database.Password, c.Database.Name, c.Database.SSLMode)
 }

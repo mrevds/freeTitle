@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"microblog/internal/config"
 	"microblog/internal/database"
 	"microblog/internal/router"
@@ -8,14 +9,26 @@ import (
 )
 
 func main() {
-	cfg := config.LoadConfig()
+	// Загружаем конфигурацию с проверкой ошибок
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatal("Failed to load config:", err)
+	}
 
+	// Инициализируем JWT
 	util.InitJWT(cfg)
 
+	// Инициализируем базу данных
 	database.InitDB(cfg)
 
+	// Настраиваем роутер
 	r := router.Routers()
-	if err := r.Run(":8080"); err != nil {
-		panic("ошибка запуска сервера: " + err.Error())
+
+	// Используем порт из конфигурации
+	serverAddr := ":" + cfg.Server.Port
+	log.Printf("Server starting on port %s", cfg.Server.Port)
+
+	if err := r.Run(serverAddr); err != nil {
+		log.Fatal("Ошибка запуска сервера:", err)
 	}
 }
