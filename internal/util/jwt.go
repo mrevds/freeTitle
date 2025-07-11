@@ -3,11 +3,12 @@ package util
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
+	"microblog/internal/config"
 	"time"
 )
 
-var jwtSecret = []byte("your-secret-key")
-var refreshSecret = []byte("your-refresh-secret-key")
+var jwtSecret []byte
+var refreshSecret []byte
 
 type Claims struct {
 	Username string `json:"username"`
@@ -17,6 +18,11 @@ type Claims struct {
 type RefreshClaims struct {
 	Username string `json:"username"`
 	jwt.RegisteredClaims
+}
+
+func InitJWT(cfg *config.Config) {
+	jwtSecret = []byte(cfg.JWT.Secret)
+	refreshSecret = []byte(cfg.JWT.RefreshSecret)
 }
 
 func GenerateToken(username string) (string, error) {

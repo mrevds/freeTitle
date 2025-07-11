@@ -17,7 +17,7 @@ type UpdateCommentRequest struct {
 }
 
 func CreateComment(c *gin.Context) {
-	postIDStr := c.Param("id") // Изменили с "postId" на "id"
+	postIDStr := c.Param("id")
 	postID, err := strconv.ParseInt(postIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -34,7 +34,6 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Получаем username из контекста
 	username, exists := c.Get("username")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -43,7 +42,6 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Находим пользователя по username
 	user, err := repository.GetUserByUsername(username.(string))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -52,7 +50,6 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, что пост существует
 	_, err = repository.GetPostByID(postID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -61,7 +58,6 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Создаем комментарий
 	comment := &model.Comment{
 		Content:  req.Content,
 		PostID:   postID,
@@ -76,7 +72,6 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароль автора в ответе
 	createdComment.Author.Password = ""
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -86,7 +81,7 @@ func CreateComment(c *gin.Context) {
 }
 
 func GetCommentsByPost(c *gin.Context) {
-	postIDStr := c.Param("id") // Изменили с "postId" на "id"
+	postIDStr := c.Param("id")
 	postID, err := strconv.ParseInt(postIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -108,7 +103,6 @@ func GetCommentsByPost(c *gin.Context) {
 		offset = 0
 	}
 
-	// Проверяем, что пост существует
 	_, err = repository.GetPostByID(postID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -125,7 +119,6 @@ func GetCommentsByPost(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароли авторов
 	for i := range comments {
 		comments[i].Author.Password = ""
 	}
@@ -166,7 +159,6 @@ func GetPostWithComments(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароль автора поста
 	post.Author.Password = ""
 
 	c.JSON(http.StatusOK, gin.H{
@@ -192,7 +184,6 @@ func UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Получаем username из контекста
 	username, exists := c.Get("username")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -201,7 +192,6 @@ func UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Находим пользователя
 	user, err := repository.GetUserByUsername(username.(string))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -210,7 +200,6 @@ func UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, что комментарий существует и принадлежит пользователю
 	comment, err := repository.GetCommentByID(commentID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -226,7 +215,6 @@ func UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Обновляем комментарий
 	updatedComment := &model.Comment{
 		Content: req.Content,
 	}
@@ -239,7 +227,6 @@ func UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароль автора
 	result.Author.Password = ""
 
 	c.JSON(http.StatusOK, gin.H{
@@ -258,7 +245,6 @@ func DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Получаем username из контекста
 	username, exists := c.Get("username")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -267,7 +253,6 @@ func DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Находим пользователя
 	user, err := repository.GetUserByUsername(username.(string))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -276,7 +261,6 @@ func DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, что комментарий существует и принадлежит пользователю
 	comment, err := repository.GetCommentByID(commentID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -292,7 +276,6 @@ func DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Удаляем комментарий
 	if err := repository.DeleteComment(commentID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to delete comment",

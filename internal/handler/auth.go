@@ -153,7 +153,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Сохраняем refresh token в базе данных
 	if err := repository.UpdateUserRefreshToken(user.Username, refreshToken); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to save refresh token",
@@ -178,7 +177,6 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Валидируем refresh token
 	_, err := util.ValidateRefreshToken(req.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -187,7 +185,6 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, что refresh token существует в базе данных
 	user, err := repository.GetUserByRefreshToken(req.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -196,7 +193,6 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Генерируем новые токены
 	newAccessToken, err := util.GenerateToken(user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -213,7 +209,6 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Обновляем refresh token в базе данных
 	if err := repository.UpdateUserRefreshToken(user.Username, newRefreshToken); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to update refresh token",
@@ -235,7 +230,6 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	// Очищаем refresh token из базы данных
 	if err := repository.ClearUserRefreshToken(username.(string)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to logout",

@@ -30,7 +30,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Сохраняем username в контексте для использования в защищенных маршрутах
 		c.Set("username", claims.Username)
 		c.Next()
 	}

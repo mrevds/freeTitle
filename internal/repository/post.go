@@ -11,7 +11,6 @@ func CreatePost(post *model.Post) (*model.Post, error) {
 		return nil, result.Error
 	}
 
-	// Загружаем пост с автором
 	database.DB.Preload("Author").First(post, post.ID)
 
 	return post, nil
@@ -24,7 +23,6 @@ func GetPostByID(id int64) (*model.Post, error) {
 		return nil, result.Error
 	}
 
-	// Подсчитываем количество комментариев
 	count, _ := GetCommentsCountByPostID(post.ID)
 	post.CommentsCount = count
 
@@ -38,13 +36,11 @@ func GetPostByIDWithComments(id int64, commentLimit, commentOffset int) (*model.
 		return nil, result.Error
 	}
 
-	// Загружаем комментарии
 	comments, err := GetCommentsByPostID(post.ID, commentLimit, commentOffset)
 	if err != nil {
 		return nil, err
 	}
 
-	// Очищаем пароли авторов комментариев
 	for i := range comments {
 		comments[i].Author.Password = ""
 	}
@@ -66,7 +62,6 @@ func GetAllPosts(limit, offset int) ([]model.Post, error) {
 		return nil, result.Error
 	}
 
-	// Подсчитываем количество комментариев для каждого поста
 	for i := range posts {
 		count, _ := GetCommentsCountByPostID(posts[i].ID)
 		posts[i].CommentsCount = count
@@ -87,7 +82,6 @@ func GetPostsByAuthor(authorID int64, limit, offset int) ([]model.Post, error) {
 		return nil, result.Error
 	}
 
-	// Подсчитываем количество комментариев для каждого поста
 	for i := range posts {
 		count, _ := GetCommentsCountByPostID(posts[i].ID)
 		posts[i].CommentsCount = count
@@ -102,7 +96,6 @@ func UpdatePost(id int64, post *model.Post) (*model.Post, error) {
 		return nil, result.Error
 	}
 
-	// Загружаем обновленный пост
 	var updatedPost model.Post
 	database.DB.Preload("Author").First(&updatedPost, id)
 

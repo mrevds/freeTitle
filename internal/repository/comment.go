@@ -11,7 +11,6 @@ func CreateComment(comment *model.Comment) (*model.Comment, error) {
 		return nil, result.Error
 	}
 
-	// Загружаем комментарий с автором
 	database.DB.Preload("Author").First(comment, comment.ID)
 
 	return comment, nil
@@ -46,7 +45,6 @@ func UpdateComment(id int64, comment *model.Comment) (*model.Comment, error) {
 		return nil, result.Error
 	}
 
-	// Загружаем обновленный комментарий
 	var updatedComment model.Comment
 	database.DB.Preload("Author").First(&updatedComment, id)
 

@@ -27,7 +27,6 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	// Получаем username из контекста
 	username, exists := c.Get("username")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -36,7 +35,6 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	// Находим пользователя по username
 	user, err := repository.GetUserByUsername(username.(string))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -45,7 +43,6 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	// Создаем пост
 	post := &model.Post{
 		Title:    req.Title,
 		Content:  req.Content,
@@ -60,7 +57,6 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароль автора в ответе
 	createdPost.Author.Password = ""
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -87,7 +83,6 @@ func GetPost(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароль автора
 	post.Author.Password = ""
 
 	c.JSON(http.StatusOK, gin.H{
@@ -117,7 +112,6 @@ func GetAllPosts(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароли авторов
 	for i := range posts {
 		posts[i].Author.Password = ""
 	}
@@ -165,7 +159,6 @@ func GetMyPosts(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароли авторов
 	for i := range posts {
 		posts[i].Author.Password = ""
 	}
@@ -193,7 +186,6 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
-	// Получаем username из контекста
 	username, exists := c.Get("username")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -202,7 +194,6 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
-	// Находим пользователя
 	user, err := repository.GetUserByUsername(username.(string))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -211,7 +202,6 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, что пост существует и принадлежит пользователю
 	post, err := repository.GetPostByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -227,7 +217,6 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
-	// Обновляем пост
 	updatedPost := &model.Post{
 		Title:   req.Title,
 		Content: req.Content,
@@ -241,7 +230,6 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
-	// Очищаем пароль автора
 	result.Author.Password = ""
 
 	c.JSON(http.StatusOK, gin.H{
@@ -260,7 +248,6 @@ func DeletePost(c *gin.Context) {
 		return
 	}
 
-	// Получаем username из контекста
 	username, exists := c.Get("username")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -269,7 +256,6 @@ func DeletePost(c *gin.Context) {
 		return
 	}
 
-	// Находим пользователя
 	user, err := repository.GetUserByUsername(username.(string))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -278,7 +264,6 @@ func DeletePost(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, что пост существует и принадлежит пользователю
 	post, err := repository.GetPostByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -294,7 +279,6 @@ func DeletePost(c *gin.Context) {
 		return
 	}
 
-	// Удаляем пост
 	if err := repository.DeletePost(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to delete post",
